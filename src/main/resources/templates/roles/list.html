@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<!--
+    templates/roles/list.html
+    ============================================================
+    Role Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Role Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Role Management')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-key-fill me-2 text-primary-custom"></i>Role Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Roles</li>
+                </ol>
+            </nav>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/roles/new}" class="btn btn-primary" id="add-role-btn">
+                <i class="bi bi-plus-lg"></i> Add New Role
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">System Roles</div>
+                <div class="card-header-subtitle">Manage user permissions and access levels</div>
+            </div>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(roles)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-shield-lock"></i></div>
+                <div class="empty-state-title">No Roles Found</div>
+                <div class="empty-state-text">Create system roles to manage access.</div>
+                <a th:href="@{/roles/new}" class="btn btn-primary mt-3"
+                   sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-plus-lg"></i> Create First Role
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(roles)}" class="table-responsive">
+                <table class="table" id="roles-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Role Name<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Description<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="role, iterStat : ${roles}">
+                            <td class="text-muted-custom fw-500" th:text="${iterStat.count}">1</td>
+
+                            <!-- Role Name -->
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${role.name == 'ADMIN' or role.name == 'ROLE_ADMIN'} ? 'badge-danger' : 'badge-primary'">
+                                    <i class="bi bi-shield-check me-1"></i>
+                                    <span th:text="${role.name}">ROLE_NAME</span>
+                                </span>
+                            </td>
+
+                            <!-- Description -->
+                            <td class="text-muted-custom" th:text="${role.description != null ? role.description : '—'}">
+                                Description
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/roles/edit/{id}(id=${role.id})}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <!-- Prevent deleting ADMIN role -->
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            th:if="${role.name != 'ADMIN' and role.name != 'ROLE_ADMIN'}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmModal"
+                                            th:data-delete-url="@{/roles/delete/{id}(id=${role.id})}"
+                                            th:data-entity-name="${role.name}">
+                                        <i class="bi bi-trash3-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

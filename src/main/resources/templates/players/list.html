@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<!--
+    templates/players/list.html
+    ============================================================
+    Player Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Player Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Player Management')}"></header>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-person-fill-check me-2 text-primary-custom"></i>Player Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Players</li>
+                </ol>
+            </nav>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/players/new}" class="btn btn-primary" id="add-player-btn">
+                <i class="bi bi-plus-lg"></i> Add New Player
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">All Players</div>
+                <div class="card-header-subtitle">Manage registered players</div>
+            </div>
+            <!-- Search -->
+            <form class="search-form" th:action="@{/players}" method="get">
+                <div class="search-input-group">
+                    <span class="search-icon-inner"><i class="bi bi-search"></i></span>
+                    <input type="text"
+                           class="form-control search-input"
+                           name="keyword"
+                           th:value="${keyword}"
+                           placeholder="Search players…">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a th:href="@{/players}" class="btn btn-secondary btn-sm"
+                   th:if="${keyword != null and keyword != ''}">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(players)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-person-slash"></i></div>
+                <div class="empty-state-title">No Players Found</div>
+                <div class="empty-state-text">
+                    <span th:if="${keyword != null and keyword != ''}">
+                        No results for "<strong th:text="${keyword}"></strong>".
+                    </span>
+                    <span th:if="${keyword == null or keyword == ''}">
+                        Get started by adding your first player.
+                    </span>
+                </div>
+                <a th:href="@{/players/new}" class="btn btn-primary mt-3"
+                   sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-plus-lg"></i> Add First Player
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(players)}" class="table-responsive">
+                <table class="table" id="players-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Player<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Position<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Jersey</th>
+                            <th class="sortable">Team<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Status</th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="player, iterStat : ${players}">
+                            <td class="text-muted-custom fw-500"
+                                th:text="${iterStat.count}">1</td>
+
+                            <!-- Player Avatar + Name -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:36px;height:36px; border-radius:50%;
+                                                background: linear-gradient(135deg, var(--success), #15803D);
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:#fff; font-size:12px; font-weight:700; flex-shrink:0;">
+                                        <span th:text="${#strings.substring(player.firstName, 0, 1)}">P</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-600"
+                                             th:text="${player.firstName + ' ' + player.lastName}">Player Name</div>
+                                        <div style="font-size:11px; color:var(--text-muted);"
+                                             th:text="${player.nationality != null ? player.nationality : ''}">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span class="badge badge-info"
+                                      th:if="${player.position != null and player.position != ''}"
+                                      th:text="${player.position}">Position</span>
+                                <span th:if="${player.position == null or player.position == ''}"
+                                      class="text-muted-custom">—</span>
+                            </td>
+
+                            <td>
+                                <span th:if="${player.jerseyNumber != null}"
+                                      class="fw-700"
+                                      style="font-size:16px; color:var(--primary);"
+                                      th:text="'#' + ${player.jerseyNumber}">
+                                    #0
+                                </span>
+                                <span th:if="${player.jerseyNumber == null}"
+                                      class="text-muted-custom">—</span>
+                            </td>
+
+                            <td>
+                                <span th:if="${player.teamName != null}"
+                                      th:text="${player.teamName}">Team</span>
+                                <span th:if="${player.teamName == null}"
+                                      class="badge badge-neutral">Free Agent</span>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                <span th:if="${player.status != null}"
+                                      class="badge"
+                                      th:classappend="${player.status == 'Active'} ? 'badge-success'
+                                                    : (${player.status == 'Injured'} ? 'badge-danger'
+                                                    : (${player.status == 'Suspended'} ? 'badge-warning'
+                                                    : 'badge-neutral'))"
+                                      th:text="${player.status}">
+                                    Status
+                                </span>
+                                <span th:if="${player.status == null}" class="badge badge-neutral">N/A</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/players/edit/{id}(id=${player.id})}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmModal"
+                                            th:data-delete-url="@{/players/delete/{id}(id=${player.id})}"
+                                            th:data-entity-name="${player.firstName + ' ' + player.lastName}">
+                                        <i class="bi bi-trash3-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-3"
+             th:if="${totalPages != null and totalPages > 1}">
+            <div class="text-muted-custom" style="font-size:13px;">
+                Page <strong th:text="${currentPage + 1}">1</strong>
+                of <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Players pagination">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/players(page=${currentPage - 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/players(page=${i}, keyword=${keyword})}">1</a>
+                    </li>
+                    <li class="page-item"
+                        th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/players(page=${currentPage + 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div><!-- /card -->
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

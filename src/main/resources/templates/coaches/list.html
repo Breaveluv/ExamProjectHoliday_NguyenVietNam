@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<!--
+    templates/coaches/list.html
+    ============================================================
+    Coach Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Coach Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Coach Management')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-person-video3 me-2 text-primary-custom"></i>Coach Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Coaches</li>
+                </ol>
+            </nav>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/coaches/new}" class="btn btn-primary" id="add-coach-btn">
+                <i class="bi bi-plus-lg"></i> Add New Coach
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">All Coaches</div>
+                <div class="card-header-subtitle">Manage coaching staff</div>
+            </div>
+            <!-- Search -->
+            <form class="search-form" th:action="@{/coaches}" method="get">
+                <div class="search-input-group">
+                    <span class="search-icon-inner"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control search-input"
+                           name="keyword" th:value="${keyword}"
+                           placeholder="Search coaches…">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i></button>
+                <a th:href="@{/coaches}" class="btn btn-secondary btn-sm"
+                   th:if="${keyword != null and keyword != ''}"><i class="bi bi-x-lg"></i></a>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(coaches)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-person-x"></i></div>
+                <div class="empty-state-title">No Coaches Found</div>
+                <div class="empty-state-text">Add your first coach to get started.</div>
+                <a th:href="@{/coaches/new}" class="btn btn-primary mt-3"
+                   sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-plus-lg"></i> Add First Coach
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(coaches)}" class="table-responsive">
+                <table class="table" id="coaches-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Coach<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Date of Birth<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Nationality<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="coach, iterStat : ${coaches}">
+                            <td class="text-muted-custom fw-500" th:text="${iterStat.count}">1</td>
+
+                            <!-- Coach Avatar + Name -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:36px;height:36px; border-radius:50%;
+                                                background: linear-gradient(135deg, #7C3AED, #5B21B6);
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:#fff; font-size:12px; font-weight:700; flex-shrink:0;">
+                                        <span th:text="${#strings.substring(coach.firstName, 0, 1)}">C</span>
+                                    </div>
+                                    <div>
+                                        <div class="fw-600"
+                                             th:text="${coach.firstName + ' ' + coach.lastName}">Coach Name</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span th:if="${coach.dateOfBirth != null}">
+                                    <i class="bi bi-calendar3 text-muted-custom me-1"></i>
+                                    <span th:text="${coach.dateOfBirth}">DOB</span>
+                                </span>
+                                <span th:if="${coach.dateOfBirth == null}" class="text-muted-custom">—</span>
+                            </td>
+
+                            <td>
+                                <span th:if="${coach.nationality != null and coach.nationality != ''}"
+                                      class="badge badge-primary"
+                                      th:text="${coach.nationality}">Nationality</span>
+                                <span th:if="${coach.nationality == null or coach.nationality == ''}"
+                                      class="text-muted-custom">—</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/coaches/edit/{id}(id=${coach.id})}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmModal"
+                                            th:data-delete-url="@{/coaches/delete/{id}(id=${coach.id})}"
+                                            th:data-entity-name="${coach.firstName + ' ' + coach.lastName}">
+                                        <i class="bi bi-trash3-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-3"
+             th:if="${totalPages != null and totalPages > 1}">
+            <div class="text-muted-custom" style="font-size:13px;">
+                Page <strong th:text="${currentPage + 1}">1</strong>
+                of <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Coaches pagination">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/coaches(page=${currentPage - 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/coaches(page=${i}, keyword=${keyword})}">1</a>
+                    </li>
+                    <li class="page-item"
+                        th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/coaches(page=${currentPage + 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div><!-- /card -->
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

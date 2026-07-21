@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<!--
+    templates/players/form.html
+    ============================================================
+    Player Management - Create / Edit Form
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Player Form')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Player Form')}"></header>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title"
+                th:text="${player.id == null ? '➕ Create New Player' : '✏️ Edit Player'}">
+                Player Form
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/players}">Players</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${player.id == null ? 'Create' : 'Edit'}">Form</li>
+                </ol>
+            </nav>
+        </div>
+        <a th:href="@{/players}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Players
+        </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9 col-xl-8">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-person-fill-check me-2 text-primary-custom"></i>
+                            <span th:text="${player.id == null ? 'New Player Details' : 'Edit Player Details'}">
+                                Player Details
+                            </span>
+                        </div>
+                        <div class="card-header-subtitle">Fill in the player information</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="${player.id == null} ? @{/players/new} : @{/players/edit/{id}(id=${player.id})}"
+                          th:object="${player}"
+                          method="post"
+                          id="playerForm">
+
+                        <input type="hidden" th:field="*{id}" th:if="${player.id != null}">
+
+                        <!-- Section: Personal Info -->
+                        <div class="form-section-label">Personal Information</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="firstName" class="form-label">
+                                    First Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="firstName"
+                                       th:field="*{firstName}"
+                                       th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid'"
+                                       placeholder="First name">
+                                <div class="field-error" th:if="${#fields.hasErrors('firstName')}"
+                                     th:errors="*{firstName}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="lastName" class="form-label">
+                                    Last Name <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="lastName"
+                                       th:field="*{lastName}"
+                                       th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid'"
+                                       placeholder="Last name">
+                                <div class="field-error" th:if="${#fields.hasErrors('lastName')}"
+                                     th:errors="*{lastName}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="dateOfBirth" class="form-label">Date of Birth</label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="dateOfBirth"
+                                       th:field="*{dateOfBirth}"
+                                       th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid'">
+                                <div class="field-error" th:if="${#fields.hasErrors('dateOfBirth')}"
+                                     th:errors="*{dateOfBirth}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="nationality" class="form-label">Nationality</label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="nationality"
+                                       th:field="*{nationality}"
+                                       th:classappend="${#fields.hasErrors('nationality')} ? 'is-invalid'"
+                                       placeholder="e.g. Brazilian">
+                                <div class="field-error" th:if="${#fields.hasErrors('nationality')}"
+                                     th:errors="*{nationality}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Football Info -->
+                        <div class="form-section-label mt-4">Football Information</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="position" class="form-label">
+                                    Position <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="position"
+                                       th:field="*{position}"
+                                       th:classappend="${#fields.hasErrors('position')} ? 'is-invalid'"
+                                       placeholder="e.g. Forward, Midfielder">
+                                <div class="field-error" th:if="${#fields.hasErrors('position')}"
+                                     th:errors="*{position}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="jerseyNumber" class="form-label">Jersey Number</label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="jerseyNumber"
+                                       th:field="*{jerseyNumber}"
+                                       th:classappend="${#fields.hasErrors('jerseyNumber')} ? 'is-invalid'"
+                                       placeholder="e.g. 10"
+                                       min="1"
+                                       max="99">
+                                <div class="field-error" th:if="${#fields.hasErrors('jerseyNumber')}"
+                                     th:errors="*{jerseyNumber}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="teamId" class="form-label">Team</label>
+                                <select class="form-select"
+                                        id="teamId"
+                                        th:field="*{teamId}"
+                                        th:classappend="${#fields.hasErrors('teamId')} ? 'is-invalid'">
+                                    <option value="">— Select Team (Optional) —</option>
+                                    <option th:each="team : ${teams}"
+                                            th:value="${team.id}"
+                                            th:text="${team.name}"
+                                            th:selected="${team.id == player.teamId}">
+                                    </option>
+                                </select>
+                                <div class="field-error" th:if="${#fields.hasErrors('teamId')}"
+                                     th:errors="*{teamId}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="status" class="form-label">
+                                    Status <span class="text-danger">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="status"
+                                       th:field="*{status}"
+                                       th:classappend="${#fields.hasErrors('status')} ? 'is-invalid'"
+                                       placeholder="e.g. Active, Injured, Suspended">
+                                <div class="field-error" th:if="${#fields.hasErrors('status')}"
+                                     th:errors="*{status}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Contract -->
+                        <div class="form-section-label mt-4">Contract Details</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="contractStartDate" class="form-label">
+                                    Contract Start Date
+                                </label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="contractStartDate"
+                                       th:field="*{contractStartDate}"
+                                       th:classappend="${#fields.hasErrors('contractStartDate')} ? 'is-invalid'">
+                                <div class="field-error" th:if="${#fields.hasErrors('contractStartDate')}"
+                                     th:errors="*{contractStartDate}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="contractEndDate" class="form-label">
+                                    Contract End Date
+                                </label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="contractEndDate"
+                                       th:field="*{contractEndDate}"
+                                       th:classappend="${#fields.hasErrors('contractEndDate')} ? 'is-invalid'">
+                                <div class="field-error" th:if="${#fields.hasErrors('contractEndDate')}"
+                                     th:errors="*{contractEndDate}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 pt-2 mt-4 border-top">
+                            <button type="submit" class="btn btn-primary" id="save-player-btn">
+                                <i class="bi bi-floppy-fill"></i>
+                                <span th:text="${player.id == null ? 'Create Player' : 'Save Changes'}">Save</span>
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <a th:href="@{/players}" class="btn btn-secondary ms-auto">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div><!-- /card-body -->
+            </div><!-- /card -->
+        </div>
+    </div><!-- /row -->
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

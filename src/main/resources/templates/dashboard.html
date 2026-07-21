@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!--
+    templates/dashboard.html
+    ============================================================
+    Main Dashboard - Stats Overview + Upcoming Matches + Top Scorers
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- HEAD -->
+<head th:replace="~{layouts/main :: head('Dashboard')}"></head>
+
+<body>
+
+<!-- Mobile Overlay -->
+<div th:replace="~{layouts/main :: overlay}"></div>
+
+<!-- Sidebar -->
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+
+<!-- Topbar -->
+<header th:replace="~{layouts/main :: topbar('Dashboard')}"></header>
+
+<!-- ============================================================
+     MAIN CONTENT
+============================================================ -->
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-grid-1x2-fill me-2 text-primary-custom"></i>Dashboard
+            </h1>
+            <p class="page-subtitle">Welcome back! Here's what's happening today.</p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </nav>
+        </div>
+        <div>
+            <span class="badge badge-success px-3 py-2" style="font-size:12px;">
+                <i class="bi bi-circle-fill me-1" style="font-size:8px;"></i> System Online
+            </span>
+        </div>
+    </div>
+
+    <!-- --------------------------------------------------------
+         STAT CARDS ROW
+    -------------------------------------------------------- -->
+    <div class="row g-4 mb-4">
+
+        <!-- Total Teams -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card" style="--stat-color: var(--primary);">
+                <div class="stat-icon primary">
+                    <i class="bi bi-shield-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${dashboardData.totalTeams}">0</div>
+                    <div class="stat-label">Total Teams</div>
+                    <div class="stat-change up">
+                        <i class="bi bi-arrow-up-short"></i> Active
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Players -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card" style="--stat-color: var(--success);">
+                <div class="stat-icon success">
+                    <i class="bi bi-person-fill-check"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value" th:text="${dashboardData.totalPlayers}">0</div>
+                    <div class="stat-label">Total Players</div>
+                    <div class="stat-change up">
+                        <i class="bi bi-arrow-up-short"></i> Registered
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Total Coaches -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card" style="--stat-color: var(--warning);">
+                <div class="stat-icon warning">
+                    <i class="bi bi-person-video3"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value">
+                        <!-- If dashboardData has totalCoaches, use it; else show N/A -->
+                        <span th:if="${dashboardData.totalCoaches != null}"
+                              th:text="${dashboardData.totalCoaches}">0</span>
+                        <span th:if="${dashboardData.totalCoaches == null}">—</span>
+                    </div>
+                    <div class="stat-label">Total Coaches</div>
+                    <div class="stat-change up">
+                        <i class="bi bi-arrow-up-short"></i> Active
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Upcoming Matches Count -->
+        <div class="col-12 col-sm-6 col-xl-3">
+            <div class="stat-card" style="--stat-color: var(--danger);">
+                <div class="stat-icon danger">
+                    <i class="bi bi-calendar2-event-fill"></i>
+                </div>
+                <div class="stat-info">
+                    <div class="stat-value"
+                         th:text="${#lists.isEmpty(dashboardData.upcomingMatches) ? 0 : dashboardData.upcomingMatches.size()}">
+                        0
+                    </div>
+                    <div class="stat-label">Upcoming Matches</div>
+                    <div class="stat-change up">
+                        <i class="bi bi-calendar-check"></i> Scheduled
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /row stat cards -->
+
+    <!-- --------------------------------------------------------
+         SECOND ROW: Upcoming Matches + Quick Links
+    -------------------------------------------------------- -->
+    <div class="row g-4 mb-4">
+
+        <!-- Upcoming Matches -->
+        <div class="col-12 col-lg-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-calendar2-event me-2 text-primary-custom"></i>Upcoming Matches
+                        </div>
+                        <div class="card-header-subtitle">Next scheduled matches</div>
+                    </div>
+                    <a th:href="@{/matches}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> View All
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(dashboardData.upcomingMatches)}"
+                         class="empty-state">
+                        <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+                        <div class="empty-state-title">No Upcoming Matches</div>
+                        <div class="empty-state-text">There are no matches scheduled yet.</div>
+                    </div>
+
+                    <!-- Match List -->
+                    <div th:unless="${#lists.isEmpty(dashboardData.upcomingMatches)}"
+                         class="list-group list-group-flush">
+                        <div class="list-group-item px-4 py-3 border-0 border-bottom"
+                             th:each="match : ${dashboardData.upcomingMatches}"
+                             style="transition: background .2s;">
+                            <div class="d-flex align-items-center gap-3">
+                                <!-- VS Badge -->
+                                <div class="text-center"
+                                     style="min-width:52px;">
+                                    <div style="background: var(--primary-light); color: var(--primary);
+                                                border-radius:8px; padding: 6px 4px; font-size:10px; font-weight:700;
+                                                letter-spacing:.5px;">
+                                        VS
+                                    </div>
+                                </div>
+                                <!-- Teams -->
+                                <div class="flex-grow-1">
+                                    <div class="fw-600" style="font-size:14px;"
+                                         th:text="${match.homeTeamName} + ' vs ' + ${match.awayTeamName}">
+                                        Team A vs Team B
+                                    </div>
+                                    <div style="font-size:12px; color: var(--text-muted); margin-top:3px;">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span th:text="${#temporals.format(match.matchDate, 'dd MMM yyyy, HH:mm')}">
+                                            01 Jan 2026, 15:00
+                                        </span>
+                                        &nbsp;·&nbsp;
+                                        <i class="bi bi-geo-alt me-1"></i>
+                                        <span th:text="${match.location}">Stadium</span>
+                                    </div>
+                                </div>
+                                <!-- Status badge -->
+                                <span class="badge badge-primary">Scheduled</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Navigation Links -->
+        <div class="col-12 col-lg-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-lightning-fill me-2" style="color:var(--warning);"></i>Quick Access
+                        </div>
+                        <div class="card-header-subtitle">Jump to management sections</div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <!-- Teams -->
+                        <div class="col-6">
+                            <a th:href="@{/teams}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:var(--primary-light); transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-shield-fill" style="font-size:24px; color:var(--primary);"></i>
+                                    <div style="font-size:12px; font-weight:600; color:var(--primary); margin-top:6px;">Teams</div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Players -->
+                        <div class="col-6">
+                            <a th:href="@{/players}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:var(--success-light); transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-person-fill-check" style="font-size:24px; color:var(--success);"></i>
+                                    <div style="font-size:12px; font-weight:600; color:var(--success); margin-top:6px;">Players</div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Matches -->
+                        <div class="col-6">
+                            <a th:href="@{/matches}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:var(--danger-light); transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-calendar2-event-fill" style="font-size:24px; color:var(--danger);"></i>
+                                    <div style="font-size:12px; font-weight:600; color:var(--danger); margin-top:6px;">Matches</div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Transfers -->
+                        <div class="col-6">
+                            <a th:href="@{/transfers}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:var(--warning-light); transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-arrow-left-right" style="font-size:24px; color:var(--warning);"></i>
+                                    <div style="font-size:12px; font-weight:600; color:#92400E; margin-top:6px;">Transfers</div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Stats -->
+                        <div class="col-6">
+                            <a th:href="@{/statistics}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:var(--info-light); transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-bar-chart-fill" style="font-size:24px; color:var(--info);"></i>
+                                    <div style="font-size:12px; font-weight:600; color:var(--info); margin-top:6px;">Statistics</div>
+                                </div>
+                            </a>
+                        </div>
+                        <!-- Coaches -->
+                        <div class="col-6">
+                            <a th:href="@{/coaches}" class="text-decoration-none">
+                                <div class="p-3 rounded text-center" style="background:#F5F3FF; transition: .2s;"
+                                     onmouseover="this.style.transform='translateY(-2px)'"
+                                     onmouseout="this.style.transform='none'">
+                                    <i class="bi bi-person-video3" style="font-size:24px; color:#7C3AED;"></i>
+                                    <div style="font-size:12px; font-weight:600; color:#7C3AED; margin-top:6px;">Coaches</div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /row upcoming + quick links -->
+
+    <!-- --------------------------------------------------------
+         TOP SCORERS TABLE
+    -------------------------------------------------------- -->
+    <div class="row g-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-trophy-fill me-2" style="color:var(--warning);"></i>Top Scorers
+                        </div>
+                        <div class="card-header-subtitle">Players with most goals</div>
+                    </div>
+                    <a th:href="@{/statistics}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-arrow-right"></i> Full Stats
+                    </a>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Empty State -->
+                    <div th:if="${#lists.isEmpty(dashboardData.topScorers)}" class="empty-state">
+                        <div class="empty-state-icon"><i class="bi bi-trophy"></i></div>
+                        <div class="empty-state-title">No Statistics Yet</div>
+                        <div class="empty-state-text">Add match statistics to see top scorers.</div>
+                    </div>
+
+                    <!-- Table -->
+                    <div th:unless="${#lists.isEmpty(dashboardData.topScorers)}"
+                         class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Player</th>
+                                    <th>Team</th>
+                                    <th>Goals</th>
+                                    <th>Performance</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="scorer, iterStat : ${dashboardData.topScorers}">
+                                    <!-- Rank with medal for top 3 -->
+                                    <td>
+                                        <span th:if="${iterStat.index == 0}"
+                                              style="font-size:18px;">🥇</span>
+                                        <span th:if="${iterStat.index == 1}"
+                                              style="font-size:18px;">🥈</span>
+                                        <span th:if="${iterStat.index == 2}"
+                                              style="font-size:18px;">🥉</span>
+                                        <span th:if="${iterStat.index > 2}"
+                                              class="fw-600 text-muted-custom"
+                                              th:text="${iterStat.index + 1}">4</span>
+                                    </td>
+                                    <!-- Player Name -->
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div style="width:32px;height:32px; border-radius:50%;
+                                                        background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                                                        display:flex; align-items:center; justify-content:center;
+                                                        color:#fff; font-size:12px; font-weight:700; flex-shrink:0;">
+                                                <span th:text="${#strings.substring(scorer.playerName, 0, 1)}">P</span>
+                                            </div>
+                                            <span class="fw-600" th:text="${scorer.playerName}">Player Name</span>
+                                        </div>
+                                    </td>
+                                    <td th:text="${scorer.teamName}">Team</td>
+                                    <td>
+                                        <span class="badge badge-success fw-700"
+                                              th:text="${scorer.totalGoals} + ' ⚽'">0 ⚽</span>
+                                    </td>
+                                    <!-- Progress bar -->
+                                    <td style="min-width:120px;">
+                                        <div style="background:#F1F5F9; border-radius:4px; height:6px; overflow:hidden;">
+                                            <div style="background: linear-gradient(90deg, var(--primary), var(--success));
+                                                        height:100%; border-radius:4px;"
+                                                 th:style="'width: ' + ${scorer.totalGoals * 10 > 100 ? 100 : scorer.totalGoals * 10} + '%;'">
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /row top scorers -->
+
+    <!-- Footer -->
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+
+</main><!-- /#main-content -->
+
+<!-- Delete Modal -->
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+
+<!-- Toast Container -->
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+
+<!-- Scripts -->
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

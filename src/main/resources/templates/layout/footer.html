@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<footer th:fragment="footer" class="custom-footer pt-5 pb-3">
+    <div class="container">
+        <div class="row gy-4 mb-4">
+            <!-- About -->
+            <div class="col-lg-4 col-md-6">
+                <div class="footer-brand mb-3">
+                    <i class="fa-solid fa-shield-halved me-2 text-primary fa-2x"></i>
+                    <span class="fw-bold h4 text-white">FC Management</span>
+                </div>
+                <p class="text-secondary mb-4">
+                    The ultimate platform to manage your football club. Discover top players, follow live matches, and lead your team to victory with our comprehensive management system.
+                </p>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="col-lg-2 col-md-6 offset-lg-1">
+                <h5 class="text-white mb-3 fw-bold">Quick Links</h5>
+                <ul class="list-unstyled footer-links">
+                    <li><a th:href="@{/}" class="text-secondary text-decoration-none"><i class="fa-solid fa-chevron-right me-2 small"></i>Home</a></li>
+                    <li><a th:href="@{/players}" class="text-secondary text-decoration-none"><i class="fa-solid fa-chevron-right me-2 small"></i>Players</a></li>
+                    <li><a th:href="@{/teams}" class="text-secondary text-decoration-none"><i class="fa-solid fa-chevron-right me-2 small"></i>Teams</a></li>
+                    <li><a th:href="@{/matches}" class="text-secondary text-decoration-none"><i class="fa-solid fa-chevron-right me-2 small"></i>Matches</a></li>
+                    <li><a th:href="@{/news}" class="text-secondary text-decoration-none"><i class="fa-solid fa-chevron-right me-2 small"></i>News</a></li>
+                </ul>
+            </div>
+
+            <!-- Contact -->
+            <div class="col-lg-3 col-md-6">
+                <h5 class="text-white mb-3 fw-bold">Contact Us</h5>
+                <ul class="list-unstyled text-secondary">
+                    <li class="mb-2"><i class="fa-solid fa-location-dot me-3 text-primary"></i>123 Stadium Road, London, UK</li>
+                    <li class="mb-2"><i class="fa-solid fa-phone me-3 text-primary"></i>+44 20 1234 5678</li>
+                    <li class="mb-2"><i class="fa-solid fa-envelope me-3 text-primary"></i>contact@fcmanagement.com</li>
+                </ul>
+            </div>
+
+            <!-- Social Media -->
+            <div class="col-lg-2 col-md-6">
+                <h5 class="text-white mb-3 fw-bold">Follow Us</h5>
+                <div class="social-links d-flex gap-2">
+                    <a href="#" class="social-btn facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="#" class="social-btn instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="#" class="social-btn youtube"><i class="fa-brands fa-youtube"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <hr class="border-secondary my-4">
+
+        <div class="row align-items-center text-secondary small">
+            <div class="col-md-6 text-center text-md-start mb-2 mb-md-0">
+                &copy; 2026 FC Management. All rights reserved.
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                Designed with <i class="fa-solid fa-heart text-danger mx-1"></i> by You.
+            </div>
+        </div>
+    </div>
+</footer>
+
+</body>
+</html>

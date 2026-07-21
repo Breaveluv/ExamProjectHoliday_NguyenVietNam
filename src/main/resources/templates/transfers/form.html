@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!--
+    templates/transfers/form.html
+    ============================================================
+    Transfer Management - Create / Edit Form
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Transfer Form')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Transfer Form')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title"
+                th:text="${transfer.id == null ? '➕ Record New Transfer' : '✏️ Edit Transfer'}">
+                Transfer Form
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/transfers}">Transfers</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${transfer.id == null ? 'Record' : 'Edit'}">Form</li>
+                </ol>
+            </nav>
+        </div>
+        <a th:href="@{/transfers}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Transfers
+        </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-arrow-left-right me-2 text-primary-custom"></i>
+                            <span th:text="${transfer.id == null ? 'New Transfer Details' : 'Edit Transfer Details'}">
+                                Transfer Details
+                            </span>
+                        </div>
+                        <div class="card-header-subtitle">Fill in the transfer information</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="${transfer.id == null} ? @{/transfers/new} : @{/transfers/edit/{id}(id=${transfer.id})}"
+                          th:object="${transfer}"
+                          method="post"
+                          id="transferForm">
+
+                        <input type="hidden" th:field="*{id}" th:if="${transfer.id != null}">
+
+                        <!-- Section: Player -->
+                        <div class="form-section-label">Player</div>
+
+                        <div class="mb-3">
+                            <label for="playerId" class="form-label">
+                                Select Player <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select"
+                                    id="playerId"
+                                    th:field="*{playerId}"
+                                    th:classappend="${#fields.hasErrors('playerId')} ? 'is-invalid'">
+                                <option value="">— Select Player —</option>
+                                <option th:each="player : ${players}"
+                                        th:value="${player.id}"
+                                        th:text="${player.firstName + ' ' + player.lastName}"
+                                        th:selected="${player.id == transfer.playerId}">
+                                </option>
+                            </select>
+                            <div class="field-error" th:if="${#fields.hasErrors('playerId')}" th:errors="*{playerId}"></div>
+                        </div>
+
+                        <!-- Section: Teams -->
+                        <div class="form-section-label mt-4">Movement</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="fromTeamId" class="form-label">
+                                    <span class="badge badge-danger px-1 py-0 me-1">OUT</span> From Team
+                                </label>
+                                <select class="form-select"
+                                        id="oldTeamId"
+                                        th:field="*{oldTeamId}"
+                                        th:classappend="${#fields.hasErrors('oldTeamId')} ? 'is-invalid'">
+                                    <option value="">— Free Agent / None —</option>
+                                    <option th:each="team : ${teams}"
+                                            th:value="${team.id}"
+                                            th:text="${team.name}"
+                                            th:selected="${team.id == transfer.oldTeamId}">
+                                    </option>
+                                </select>
+                                <div class="field-error" th:if="${#fields.hasErrors('oldTeamId')}" th:errors="*{oldTeamId}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="toTeamId" class="form-label">
+                                    <span class="badge badge-success px-1 py-0 me-1">IN</span> To Team <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select"
+                                        id="newTeamId"
+                                        th:field="*{newTeamId}"
+                                        th:classappend="${#fields.hasErrors('newTeamId')} ? 'is-invalid'">
+                                    <option value="">— Select Team —</option>
+                                    <option th:each="team : ${teams}"
+                                            th:value="${team.id}"
+                                            th:text="${team.name}"
+                                            th:selected="${team.id == transfer.newTeamId}">
+                                    </option>
+                                </select>
+                                <div class="field-error" th:if="${#fields.hasErrors('newTeamId')}" th:errors="*{newTeamId}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Details -->
+                        <div class="form-section-label mt-4">Transfer Details</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="transferDate" class="form-label">
+                                    Transfer Date <span class="text-danger">*</span>
+                                </label>
+                                <input type="date"
+                                       class="form-control"
+                                       id="transferDate"
+                                       th:field="*{transferDate}"
+                                       th:classappend="${#fields.hasErrors('transferDate')} ? 'is-invalid'">
+                                <div class="field-error" th:if="${#fields.hasErrors('transferDate')}" th:errors="*{transferDate}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="transferFee" class="form-label">Transfer Fee ($)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="bi bi-currency-dollar"></i></span>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="transferFee"
+                                           th:field="*{transferFee}"
+                                           th:classappend="${#fields.hasErrors('transferFee')} ? 'is-invalid'"
+                                           placeholder="0.00"
+                                           step="0.01" min="0">
+                                </div>
+                                <div class="field-error" th:if="${#fields.hasErrors('transferFee')}" th:errors="*{transferFee}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 pt-2 mt-4 border-top">
+                            <button type="submit" class="btn btn-primary" id="save-transfer-btn">
+                                <i class="bi bi-floppy-fill"></i>
+                                <span th:text="${transfer.id == null ? 'Record Transfer' : 'Save Changes'}">Save</span>
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <a th:href="@{/transfers}" class="btn btn-secondary ms-auto">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

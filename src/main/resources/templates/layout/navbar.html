@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<nav th:fragment="navbar" class="navbar navbar-expand-lg sticky-top custom-navbar">
+    <div class="container">
+        <!-- Logo -->
+        <a class="navbar-brand d-flex align-items-center" th:href="@{/}">
+            <i class="fa-solid fa-shield-halved me-2 text-primary"></i>
+            <span class="fw-bold">FC Management</span>
+        </a>
+
+        <!-- Mobile Toggle Button -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/}" th:classappend="${#request.requestURI == '/'} ? 'active' : ''">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/players}" th:classappend="${#request.requestURI == '/players'} ? 'active' : ''">Players</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/teams}" th:classappend="${#request.requestURI == '/teams'} ? 'active' : ''">Teams</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/matches}" th:classappend="${#request.requestURI == '/matches'} ? 'active' : ''">Matches</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/news}" th:classappend="${#request.requestURI == '/news'} ? 'active' : ''">News</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/gallery}" th:classappend="${#request.requestURI == '/gallery'} ? 'active' : ''">Gallery</a>
+                </li>
+            </ul>
+
+            <!-- Auth Actions -->
+            <div class="d-flex align-items-center">
+                <!-- Guest View -->
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-outline-light me-2 rounded-pill px-4">Login</a>
+                    <a th:href="@{/register}" class="btn btn-primary rounded-pill px-4">Register</a>
+                </div>
+
+                <!-- User View -->
+                <div sec:authorize="isAuthenticated()" class="dropdown user-dropdown">
+                    <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img th:src="@{/images/default-avatar.png}" alt="" width="32" height="32" class="rounded-circle me-2 object-fit-cover" onerror="this.src='https://ui-avatars.com/api/?name='+${#authentication.name}+'&background=2563EB&color=fff'">
+                        <strong sec:authentication="name">User</strong>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" aria-labelledby="dropdownUser">
+                        <li><a class="dropdown-item" th:href="@{/dashboard}"><i class="fa-solid fa-gauge fa-fw me-2"></i>Dashboard</a></li>
+                        <li><a class="dropdown-item" th:href="@{/profile}"><i class="fa-solid fa-user fa-fw me-2"></i>Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post">
+                                <button type="submit" class="dropdown-item text-danger"><i class="fa-solid fa-right-from-bracket fa-fw me-2"></i>Logout</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+</body>
+</html>

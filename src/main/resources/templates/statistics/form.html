@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<!--
+    templates/statistics/form.html
+    ============================================================
+    Player Statistics Management - Create / Edit Form
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Statistics Form')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Statistics Form')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title"
+                th:text="${statistic.id == null ? '➕ Add Player Stats' : '✏️ Edit Player Stats'}">
+                Statistics Form
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/statistics}">Statistics</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${statistic.id == null ? 'Add' : 'Edit'}">Form</li>
+                </ol>
+            </nav>
+        </div>
+        <a th:href="@{/statistics}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Stats
+        </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-bar-chart-fill me-2 text-primary-custom"></i>
+                            <span th:text="${statistic.id == null ? 'New Match Stats' : 'Edit Match Stats'}">
+                                Match Stats
+                            </span>
+                        </div>
+                        <div class="card-header-subtitle">Record player performance</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="${statistic.id == null} ? @{/statistics/new} : @{/statistics/edit/{id}(id=${statistic.id})}"
+                          th:object="${statistic}"
+                          method="post"
+                          id="statisticForm">
+
+                        <input type="hidden" th:field="*{id}" th:if="${statistic.id != null}">
+
+                        <!-- Section: Context -->
+                        <div class="form-section-label">Context</div>
+
+                        <div class="row g-3">
+                            <div class="col-12 col-md-6">
+                                <label for="playerId" class="form-label">
+                                    Select Player <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select"
+                                        id="playerId"
+                                        th:field="*{playerId}"
+                                        th:classappend="${#fields.hasErrors('playerId')} ? 'is-invalid'">
+                                    <option value="">— Select Player —</option>
+                                    <option th:each="player : ${players}"
+                                            th:value="${player.id}"
+                                            th:text="${player.firstName + ' ' + player.lastName}"
+                                            th:selected="${player.id == statistic.playerId}">
+                                    </option>
+                                </select>
+                                <div class="field-error" th:if="${#fields.hasErrors('playerId')}" th:errors="*{playerId}"></div>
+                            </div>
+
+                            <div class="col-12 col-md-6">
+                                <label for="matchId" class="form-label">
+                                    Select Match <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select"
+                                        id="matchId"
+                                        th:field="*{matchId}"
+                                        th:classappend="${#fields.hasErrors('matchId')} ? 'is-invalid'">
+                                    <option value="">— Select Match —</option>
+                                    <option th:each="match : ${matches}"
+                                            th:value="${match.id}"
+                                            th:text="${match.homeTeamName + ' vs ' + match.awayTeamName + ' (' + #temporals.format(match.matchDate, 'dd/MM/yyyy') + ')'}"
+                                            th:selected="${match.id == statistic.matchId}">
+                                    </option>
+                                </select>
+                                <div class="field-error" th:if="${#fields.hasErrors('matchId')}" th:errors="*{matchId}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Section: Performance -->
+                        <div class="form-section-label mt-4">Performance Data</div>
+
+                        <div class="row g-3">
+                            <!-- Goals -->
+                            <div class="col-6 col-md-3">
+                                <label for="goals" class="form-label">
+                                    <i class="bi bi-circle-fill text-success me-1" style="font-size:10px;"></i>Goals
+                                </label>
+                                <input type="number"
+                                       class="form-control text-center fw-600"
+                                       id="goals"
+                                       th:field="*{goals}"
+                                       th:classappend="${#fields.hasErrors('goals')} ? 'is-invalid'"
+                                       placeholder="0"
+                                       min="0">
+                                <div class="field-error" th:if="${#fields.hasErrors('goals')}" th:errors="*{goals}"></div>
+                            </div>
+
+                            <!-- Assists -->
+                            <div class="col-6 col-md-3">
+                                <label for="assists" class="form-label">
+                                    <i class="bi bi-arrow-return-right text-info me-1" style="font-size:12px;"></i>Assists
+                                </label>
+                                <input type="number"
+                                       class="form-control text-center fw-600"
+                                       id="assists"
+                                       th:field="*{assists}"
+                                       th:classappend="${#fields.hasErrors('assists')} ? 'is-invalid'"
+                                       placeholder="0"
+                                       min="0">
+                                <div class="field-error" th:if="${#fields.hasErrors('assists')}" th:errors="*{assists}"></div>
+                            </div>
+
+                            <!-- Minutes Played -->
+                            <div class="col-12 col-md-6">
+                                <label for="minutesPlayed" class="form-label">
+                                    <i class="bi bi-stopwatch text-primary me-1"></i>Minutes Played
+                                </label>
+                                <input type="number"
+                                       class="form-control"
+                                       id="minutesPlayed"
+                                       th:field="*{minutesPlayed}"
+                                       th:classappend="${#fields.hasErrors('minutesPlayed')} ? 'is-invalid'"
+                                       placeholder="e.g. 90"
+                                       min="0" max="120">
+                                <div class="field-error" th:if="${#fields.hasErrors('minutesPlayed')}" th:errors="*{minutesPlayed}"></div>
+                            </div>
+
+                            <!-- Yellow Cards -->
+                            <div class="col-6 col-md-6">
+                                <label for="yellowCards" class="form-label">
+                                    <span style="display:inline-block; width:12px; height:16px; background:#F59E0B; border-radius:2px; margin-right:6px; vertical-align:middle;"></span>Yellow Cards
+                                </label>
+                                <input type="number"
+                                       class="form-control text-center fw-600"
+                                       id="yellowCards"
+                                       th:field="*{yellowCards}"
+                                       th:classappend="${#fields.hasErrors('yellowCards')} ? 'is-invalid'"
+                                       placeholder="0"
+                                       min="0" max="2">
+                                <div class="field-error" th:if="${#fields.hasErrors('yellowCards')}" th:errors="*{yellowCards}"></div>
+                            </div>
+
+                            <!-- Red Cards -->
+                            <div class="col-6 col-md-6">
+                                <label for="redCards" class="form-label">
+                                    <span style="display:inline-block; width:12px; height:16px; background:#DC2626; border-radius:2px; margin-right:6px; vertical-align:middle;"></span>Red Cards
+                                </label>
+                                <input type="number"
+                                       class="form-control text-center fw-600"
+                                       id="redCards"
+                                       th:field="*{redCards}"
+                                       th:classappend="${#fields.hasErrors('redCards')} ? 'is-invalid'"
+                                       placeholder="0"
+                                       min="0" max="1">
+                                <div class="field-error" th:if="${#fields.hasErrors('redCards')}" th:errors="*{redCards}"></div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 pt-2 mt-4 border-top">
+                            <button type="submit" class="btn btn-primary" id="save-stat-btn">
+                                <i class="bi bi-floppy-fill"></i>
+                                <span th:text="${statistic.id == null ? 'Save Stats' : 'Save Changes'}">Save</span>
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <a th:href="@{/statistics}" class="btn btn-secondary ms-auto">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

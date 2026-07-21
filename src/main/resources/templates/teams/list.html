@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<!--
+    templates/teams/list.html
+    ============================================================
+    Team Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Team Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Team Management')}"></header>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-shield-fill me-2 text-primary-custom"></i>Team Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Teams</li>
+                </ol>
+            </nav>
+        </div>
+        <!-- Add New Button -->
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/teams/new}" class="btn btn-primary" id="add-team-btn">
+                <i class="bi bi-plus-lg"></i> Add New Team
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">All Teams</div>
+                <div class="card-header-subtitle">Manage football teams</div>
+            </div>
+            <!-- Search Form -->
+            <form class="search-form" th:action="@{/teams}" method="get" id="search-form">
+                <div class="search-input-group">
+                    <span class="search-icon-inner"><i class="bi bi-search"></i></span>
+                    <input type="text"
+                           class="form-control search-input"
+                           id="search-keyword"
+                           name="keyword"
+                           th:value="${keyword}"
+                           placeholder="Search teams…">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <i class="bi bi-search"></i>
+                </button>
+                <a th:href="@{/teams}" class="btn btn-secondary btn-sm" th:if="${keyword != null and keyword != ''}">
+                    <i class="bi bi-x-lg"></i>
+                </a>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(teams)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-shield-slash"></i></div>
+                <div class="empty-state-title">No Teams Found</div>
+                <div class="empty-state-text">
+                    <span th:if="${keyword != null and keyword != ''}">
+                        No results for "<strong th:text="${keyword}"></strong>".
+                    </span>
+                    <span th:if="${keyword == null or keyword == ''}">
+                        Get started by adding your first team.
+                    </span>
+                </div>
+                <a th:href="@{/teams/new}" class="btn btn-primary mt-3"
+                   sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-plus-lg"></i> Add First Team
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(teams)}" class="table-responsive">
+                <table class="table" id="teams-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Team Name<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">City<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Founded<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Coach</th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="team, iterStat : ${teams}">
+                            <td class="text-muted-custom fw-500"
+                                th:text="${iterStat.count}">1</td>
+
+                            <!-- Team Name with avatar -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:34px;height:34px; border-radius:8px;
+                                                background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:#fff; font-size:13px; font-weight:700; flex-shrink:0;">
+                                        <i class="bi bi-shield-fill" style="font-size:14px;"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-600" th:text="${team.name}">Team Name</div>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span th:if="${team.city != null and team.city != ''}">
+                                    <i class="bi bi-geo-alt text-muted-custom me-1"></i>
+                                    <span th:text="${team.city}">City</span>
+                                </span>
+                                <span th:if="${team.city == null or team.city == ''}"
+                                      class="text-muted-custom">—</span>
+                            </td>
+
+                            <td th:text="${team.foundedDate != null ? team.foundedDate : '—'}">—</td>
+
+                            <td>
+                                <span th:if="${team.coachFirstName != null}"
+                                      class="badge badge-primary"
+                                      th:text="${team.coachFirstName + ' ' + team.coachLastName}">Coach</span>
+                                <span th:if="${team.coachFirstName == null}"
+                                      class="badge badge-neutral">Unassigned</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/teams/edit/{id}(id=${team.id})}"
+                                       class="btn btn-info btn-sm"
+                                       data-bs-toggle="tooltip" title="Edit Team">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <span data-bs-toggle="tooltip" title="Delete Team">
+                                        <button type="button"
+                                                class="btn btn-danger btn-sm"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#deleteConfirmModal"
+                                                th:data-delete-url="@{/teams/delete/{id}(id=${team.id})}"
+                                                th:data-entity-name="${team.name}">
+                                            <i class="bi bi-trash3-fill"></i> Delete
+                                        </button>
+                                    </span>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div><!-- /card-body -->
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-3"
+             th:if="${totalPages != null and totalPages > 1}">
+            <div class="text-muted-custom" style="font-size:13px;">
+                Showing page <strong th:text="${currentPage + 1}">1</strong>
+                of <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Teams pagination">
+                <ul class="pagination mb-0">
+                    <!-- Previous -->
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/teams(page=${currentPage - 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <!-- Page numbers -->
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/teams(page=${i}, keyword=${keyword})}">1</a>
+                    </li>
+                    <!-- Next -->
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/teams(page=${currentPage + 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div><!-- /card -->
+
+    <!-- Footer -->
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+
+</main>
+
+<!-- Delete Modal -->
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

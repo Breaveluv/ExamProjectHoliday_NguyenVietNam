@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<!--
+    templates/roles/form.html
+    ============================================================
+    Role Management - Create / Edit Form
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Role Form')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Role Form')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title"
+                th:text="${role.id == null ? '➕ Create New Role' : '✏️ Edit Role'}">
+                Role Form
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/roles}">Roles</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${role.id == null ? 'Create' : 'Edit'}">Form</li>
+                </ol>
+            </nav>
+        </div>
+        <a th:href="@{/roles}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Roles
+        </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-7 col-xl-6">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-key-fill me-2 text-primary-custom"></i>
+                            <span th:text="${role.id == null ? 'New Role Details' : 'Edit Role Details'}">
+                                Role Details
+                            </span>
+                        </div>
+                        <div class="card-header-subtitle">System role definition</div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="${role.id == null} ? @{/roles/new} : @{/roles/edit/{id}(id=${role.id})}"
+                          th:object="${role}"
+                          method="post"
+                          id="roleForm">
+
+                        <input type="hidden" th:field="*{id}" th:if="${role.id != null}">
+
+                        <!-- Section: Role Info -->
+                        <div class="form-section-label">Role Information</div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Role Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="name"
+                                   th:field="*{name}"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                   placeholder="e.g. ROLE_MANAGER">
+                            <small class="text-muted" style="font-size:11px; display:block; margin-top:4px;">
+                                Conventionally starts with 'ROLE_'.
+                            </small>
+                            <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control"
+                                      id="description"
+                                      th:field="*{description}"
+                                      th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                      rows="3"
+                                      placeholder="Describe the permissions of this role..."></textarea>
+                            <div class="field-error" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 pt-2 mt-4 border-top">
+                            <button type="submit" class="btn btn-primary" id="save-role-btn">
+                                <i class="bi bi-floppy-fill"></i>
+                                <span th:text="${role.id == null ? 'Create Role' : 'Save Changes'}">Save</span>
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <a th:href="@{/roles}" class="btn btn-secondary ms-auto">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

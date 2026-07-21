@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<!--
+    templates/matches/list.html
+    ============================================================
+    Match Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Match Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Match Management')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-calendar2-event-fill me-2 text-primary-custom"></i>Match Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Matches</li>
+                </ol>
+            </nav>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/matches/new}" class="btn btn-primary" id="add-match-btn">
+                <i class="bi bi-plus-lg"></i> Schedule Match
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">All Matches</div>
+                <div class="card-header-subtitle">Schedule and results</div>
+            </div>
+            <!-- Search -->
+            <form class="search-form" th:action="@{/matches}" method="get">
+                <div class="search-input-group">
+                    <span class="search-icon-inner"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control search-input"
+                           name="keyword" th:value="${keyword}"
+                           placeholder="Search matches…">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i></button>
+                <a th:href="@{/matches}" class="btn btn-secondary btn-sm"
+                   th:if="${keyword != null and keyword != ''}"><i class="bi bi-x-lg"></i></a>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(matches)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-calendar-x"></i></div>
+                <div class="empty-state-title">No Matches Found</div>
+                <div class="empty-state-text">Schedule your first match to get started.</div>
+                <a th:href="@{/matches/new}" class="btn btn-primary mt-3"
+                   sec:authorize="hasRole('ADMIN')">
+                    <i class="bi bi-plus-lg"></i> Schedule First Match
+                </a>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(matches)}" class="table-responsive">
+                <table class="table" id="matches-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Home Team</th>
+                            <th>Away Team</th>
+                            <th class="sortable">Date<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Location</th>
+                            <th>Score</th>
+                            <th>Status</th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="match, iterStat : ${matches}">
+                            <td class="text-muted-custom fw-500" th:text="${iterStat.count}">1</td>
+
+                            <!-- Home Team -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:30px;height:30px; border-radius:6px;
+                                                background:var(--primary-light);
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:var(--primary); font-size:13px; flex-shrink:0;">
+                                        <i class="bi bi-house-fill"></i>
+                                    </div>
+                                    <span class="fw-600" th:text="${match.homeTeamName}">Home Team</span>
+                                </div>
+                            </td>
+
+                            <!-- Away Team -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:30px;height:30px; border-radius:6px;
+                                                background:var(--danger-light);
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:var(--danger); font-size:13px; flex-shrink:0;">
+                                        <i class="bi bi-airplane-fill"></i>
+                                    </div>
+                                    <span class="fw-600" th:text="${match.awayTeamName}">Away Team</span>
+                                </div>
+                            </td>
+
+                            <td>
+                                <div style="font-size:13px;">
+                                    <i class="bi bi-calendar3 text-muted-custom me-1"></i>
+                                    <span th:text="${#temporals.format(match.matchDate, 'dd MMM yyyy')}">Date</span>
+                                    <br>
+                                    <small class="text-muted-custom">
+                                        <i class="bi bi-clock me-1"></i>
+                                        <span th:text="${#temporals.format(match.matchDate, 'HH:mm')}">Time</span>
+                                    </small>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span th:if="${match.location != null and match.location != ''}">
+                                    <i class="bi bi-geo-alt text-muted-custom me-1"></i>
+                                    <span th:text="${match.location}">Location</span>
+                                </span>
+                                <span th:if="${match.location == null or match.location == ''}"
+                                      class="text-muted-custom">—</span>
+                            </td>
+
+                            <!-- Score -->
+                            <td>
+                                <div th:if="${match.homeScore != null and match.awayScore != null}"
+                                     class="fw-700 text-center"
+                                     style="background:var(--sidebar-bg); color:#fff;
+                                            border-radius:8px; padding: 4px 10px; display:inline-block;
+                                            font-size:14px; letter-spacing:1px;">
+                                    <span th:text="${match.homeScore}">0</span>
+                                    <span style="opacity:.6; margin: 0 4px;">-</span>
+                                    <span th:text="${match.awayScore}">0</span>
+                                </div>
+                                <span th:if="${match.homeScore == null or match.awayScore == null}"
+                                      class="badge badge-neutral">TBD</span>
+                            </td>
+
+                            <!-- Status Badge -->
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${match.status == 'Scheduled' or match.status == 'SCHEDULED'} ? 'badge-info'
+                                                    : (${match.status == 'Completed' or match.status == 'COMPLETED'} ? 'badge-success'
+                                                    : (${match.status == 'Cancelled' or match.status == 'CANCELLED'} ? 'badge-danger'
+                                                    : 'badge-warning'))"
+                                      th:text="${match.status}">Status</span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/matches/edit/{id}(id=${match.id})}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmModal"
+                                            th:data-delete-url="@{/matches/delete/{id}(id=${match.id})}"
+                                            th:data-entity-name="${match.homeTeamName + ' vs ' + match.awayTeamName}">
+                                        <i class="bi bi-trash3-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-3"
+             th:if="${totalPages != null and totalPages > 1}">
+            <div class="text-muted-custom" style="font-size:13px;">
+                Page <strong th:text="${currentPage + 1}">1</strong>
+                of <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Matches pagination">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/matches(page=${currentPage - 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-left"></i>
+                        </a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}"
+                           th:href="@{/matches(page=${i}, keyword=${keyword})}">1</a>
+                    </li>
+                    <li class="page-item"
+                        th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/matches(page=${currentPage + 1}, keyword=${keyword})}">
+                            <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

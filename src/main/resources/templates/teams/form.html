@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<!--
+    templates/teams/form.html
+    ============================================================
+    Team Management - Create / Edit Form
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('Team Form')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('Team Form')}"></header>
+
+<!-- MAIN CONTENT -->
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title"
+                th:text="${team.id == null ? '➕ Create New Team' : '✏️ Edit Team'}">
+                Team Form
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/teams}">Teams</a></li>
+                    <li class="breadcrumb-item active"
+                        th:text="${team.id == null ? 'Create' : 'Edit'}">Form</li>
+                </ol>
+            </nav>
+        </div>
+        <a th:href="@{/teams}" class="btn btn-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Teams
+        </a>
+    </div>
+
+    <!-- Error Alert -->
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Form Card -->
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8 col-xl-7">
+            <div class="card">
+                <div class="card-header">
+                    <div>
+                        <div class="card-header-title">
+                            <i class="bi bi-shield-fill me-2 text-primary-custom"></i>
+                            <span th:text="${team.id == null ? 'New Team Details' : 'Edit Team Details'}">
+                                Team Details
+                            </span>
+                        </div>
+                        <div class="card-header-subtitle">
+                            Fill in the information below
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="${team.id == null} ? @{/teams/new} : @{/teams/edit/{id}(id=${team.id})}"
+                          th:object="${team}"
+                          method="post"
+                          id="teamForm">
+
+                        <!-- Hidden ID for edit -->
+                        <input type="hidden" th:field="*{id}" th:if="${team.id != null}">
+
+                        <!-- Section: Basic Info -->
+                        <div class="form-section-label">Basic Information</div>
+
+                        <div class="mb-3">
+                            <label for="name" class="form-label">
+                                Team Name <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="name"
+                                   th:field="*{name}"
+                                   th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                                   placeholder="e.g. Manchester United">
+                            <div class="field-error" th:if="${#fields.hasErrors('name')}"
+                                 th:errors="*{name}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="city" class="form-label">City / Location</label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="city"
+                                   th:field="*{city}"
+                                   th:classappend="${#fields.hasErrors('city')} ? 'is-invalid'"
+                                   placeholder="e.g. Manchester">
+                            <div class="field-error" th:if="${#fields.hasErrors('city')}"
+                                 th:errors="*{city}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="foundedDate" class="form-label">Founded Date</label>
+                            <input type="date"
+                                   class="form-control"
+                                   id="foundedDate"
+                                   th:field="*{foundedDate}"
+                                   th:classappend="${#fields.hasErrors('foundedDate')} ? 'is-invalid'">
+                            <div class="field-error" th:if="${#fields.hasErrors('foundedDate')}"
+                                 th:errors="*{foundedDate}"></div>
+                        </div>
+
+                        <!-- Section: Assignment -->
+                        <div class="form-section-label mt-4">Assignment</div>
+
+                        <div class="mb-3">
+                            <label for="coachId" class="form-label">Head Coach</label>
+                            <select class="form-select"
+                                    id="coachId"
+                                    th:field="*{coachId}"
+                                    th:classappend="${#fields.hasErrors('coachId')} ? 'is-invalid'">
+                                <option value="">— Select Coach (Optional) —</option>
+                                <option th:each="coach : ${coaches}"
+                                        th:value="${coach.id}"
+                                        th:text="${coach.firstName + ' ' + coach.lastName}"
+                                        th:selected="${coach.id == team.coachId}">
+                                </option>
+                            </select>
+                            <div class="field-error" th:if="${#fields.hasErrors('coachId')}"
+                                 th:errors="*{coachId}"></div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 pt-2 mt-4 border-top">
+                            <button type="submit" class="btn btn-primary" id="save-team-btn">
+                                <i class="bi bi-floppy-fill"></i>
+                                <span th:text="${team.id == null ? 'Create Team' : 'Save Changes'}">Save</span>
+                            </button>
+                            <button type="reset" class="btn btn-secondary">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <a th:href="@{/teams}" class="btn btn-secondary ms-auto">
+                                <i class="bi bi-x-lg"></i> Cancel
+                            </a>
+                        </div>
+
+                    </form>
+                </div><!-- /card-body -->
+            </div><!-- /card -->
+        </div>
+    </div><!-- /row -->
+
+    <!-- Footer -->
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+
+</main>
+
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

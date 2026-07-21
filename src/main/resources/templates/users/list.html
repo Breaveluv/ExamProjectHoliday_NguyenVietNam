@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<!--
+    templates/users/list.html
+    ============================================================
+    User Management - List Page
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="~{layouts/main :: head('User Management')}"></head>
+
+<body>
+
+<div th:replace="~{layouts/main :: overlay}"></div>
+<nav th:replace="~{layouts/main :: sidebar}"></nav>
+<header th:replace="~{layouts/main :: topbar('User Management')}"></header>
+
+<main id="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-left">
+            <h1 class="page-title">
+                <i class="bi bi-people-fill me-2 text-primary-custom"></i>User Management
+            </h1>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Users</li>
+                </ol>
+            </nav>
+        </div>
+        <div sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/users/new}" class="btn btn-primary" id="add-user-btn">
+                <i class="bi bi-person-plus-fill"></i> Add New User
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-check-circle-fill"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger mb-4" role="alert" data-auto-dismiss="4000">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Card -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-header-title">System Users</div>
+                <div class="card-header-subtitle">Manage accounts and roles</div>
+            </div>
+            <!-- Search -->
+            <form class="search-form" th:action="@{/users}" method="get">
+                <div class="search-input-group">
+                    <span class="search-icon-inner"><i class="bi bi-search"></i></span>
+                    <input type="text" class="form-control search-input"
+                           name="keyword" th:value="${keyword}"
+                           placeholder="Search users…">
+                </div>
+                <button type="submit" class="btn btn-primary btn-sm"><i class="bi bi-search"></i></button>
+                <a th:href="@{/users}" class="btn btn-secondary btn-sm"
+                   th:if="${keyword != null and keyword != ''}"><i class="bi bi-x-lg"></i></a>
+            </form>
+        </div>
+
+        <div class="card-body p-0">
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(users)}" class="empty-state">
+                <div class="empty-state-icon"><i class="bi bi-person-slash"></i></div>
+                <div class="empty-state-title">No Users Found</div>
+                <div class="empty-state-text">No system users found matching the criteria.</div>
+            </div>
+
+            <!-- Table -->
+            <div th:unless="${#lists.isEmpty(users)}" class="table-responsive">
+                <table class="table" id="users-table">
+                    <thead>
+                        <tr>
+                            <th class="sortable">#<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">User<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th class="sortable">Email<i class="sort-icon bi bi-arrow-down-up"></i></th>
+                            <th>Roles</th>
+                            <th>Status</th>
+                            <th sec:authorize="hasRole('ADMIN')">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user, iterStat : ${users}">
+                            <td class="text-muted-custom fw-500" th:text="${iterStat.count}">1</td>
+
+                            <!-- User Avatar & Username -->
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div style="width:36px;height:36px; border-radius:50%;
+                                                background: linear-gradient(135deg, var(--info), var(--primary));
+                                                display:flex; align-items:center; justify-content:center;
+                                                color:#fff; font-size:12px; font-weight:700; flex-shrink:0;">
+                                        <span th:text="${#strings.substring(user.username, 0, 1).toUpperCase()}">U</span>
+                                    </div>
+                                    <div class="fw-600" th:text="${user.username}">Username</div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <a th:href="'mailto:' + ${user.email}"
+                                   class="text-decoration-none text-muted-custom"
+                                   th:text="${user.email}">user@example.com</a>
+                            </td>
+
+                            <!-- Roles -->
+                            <td>
+                                <div class="d-flex flex-wrap gap-1">
+                                    <span th:each="role : ${user.roles}"
+                                          class="badge"
+                                          th:classappend="${role.name == 'ADMIN' or role.name == 'ROLE_ADMIN'} ? 'badge-danger' : 'badge-primary'"
+                                          th:text="${role.name}">
+                                        ROLE
+                                    </span>
+                                </div>
+                            </td>
+
+                            <!-- Status -->
+                            <td>
+                                <span class="badge"
+                                      th:classappend="${user.enabled} ? 'badge-success' : 'badge-danger'"
+                                      th:text="${user.enabled} ? 'Active' : 'Disabled'">
+                                    Status
+                                </span>
+                            </td>
+
+                            <!-- Actions -->
+                            <td sec:authorize="hasRole('ADMIN')">
+                                <div class="action-btns">
+                                    <a th:href="@{/users/edit/{id}(id=${user.id})}"
+                                       class="btn btn-info btn-sm">
+                                        <i class="bi bi-pencil-fill"></i> Edit
+                                    </a>
+                                    <!-- Prevent deleting self or primary admin -->
+                                    <button type="button"
+                                            class="btn btn-danger btn-sm"
+                                            th:if="${user.username != #authentication.name}"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#deleteConfirmModal"
+                                            th:data-delete-url="@{/users/delete/{id}(id=${user.id})}"
+                                            th:data-entity-name="${user.username}">
+                                        <i class="bi bi-trash3-fill"></i> Delete
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex align-items-center justify-content-between flex-wrap gap-3"
+             th:if="${totalPages != null and totalPages > 1}">
+            <div class="text-muted-custom" style="font-size:13px;">
+                Page <strong th:text="${currentPage + 1}">1</strong>
+                of <strong th:text="${totalPages}">1</strong>
+            </div>
+            <nav aria-label="Users pagination">
+                <ul class="pagination mb-0">
+                    <li class="page-item" th:classappend="${currentPage == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/users(page=${currentPage - 1}, keyword=${keyword})}"><i class="bi bi-chevron-left"></i></a>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                        th:classappend="${i == currentPage} ? 'active'">
+                        <a class="page-link" th:text="${i + 1}" th:href="@{/users(page=${i}, keyword=${keyword})}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage == totalPages - 1} ? 'disabled'">
+                        <a class="page-link" th:href="@{/users(page=${currentPage + 1}, keyword=${keyword})}"><i class="bi bi-chevron-right"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+    </div>
+
+    <footer th:replace="~{layouts/main :: footer}"></footer>
+</main>
+
+<div th:replace="~{layouts/main :: deleteModal}"></div>
+<div th:replace="~{layouts/main :: toastContainer}"></div>
+<div th:replace="~{layouts/main :: scripts}"></div>
+
+</body>
+</html>

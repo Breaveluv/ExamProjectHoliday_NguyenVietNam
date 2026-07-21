@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<!--
+    templates/layouts/main.html
+    ============================================================
+    Thymeleaf Fragment Layout - Main Dashboard Shell
+    Dùng th:fragment để compose header, sidebar, footer
+    ============================================================
+-->
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- ============================================================
+     HEAD FRAGMENT
+     Usage: <head th:replace="~{layouts/main :: head('Page Title')}">
+============================================================ -->
+<head th:fragment="head(pageTitle)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Football Club Management System - Modern Admin Dashboard">
+    <title th:text="${pageTitle} + ' | Football Club MS'">Football Club MS</title>
+
+    <!-- Bootstrap 5.3 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+          crossorigin="anonymous">
+
+    <!-- Bootstrap Icons 1.11 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet">
+
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link th:href="@{/css/style.css}" rel="stylesheet">
+</head>
+
+<!-- ============================================================
+     SIDEBAR FRAGMENT
+     Usage: <div th:replace="~{layouts/main :: sidebar}">
+============================================================ -->
+<nav id="sidebar" th:fragment="sidebar">
+    <!-- Brand / Logo -->
+    <a class="sidebar-brand" th:href="@{/dashboard}">
+        <div class="brand-icon">
+            <i class="bi bi-trophy-fill"></i>
+        </div>
+        <div class="brand-text">
+            <span class="brand-title">Football Club</span>
+            <span class="brand-sub">Management System</span>
+        </div>
+    </a>
+
+    <!-- Navigation -->
+    <div class="sidebar-nav">
+        <ul class="nav flex-column">
+            <!-- Dashboard -->
+            <li class="nav-item">
+                <a class="nav-link" th:href="@{/dashboard}">
+                    <span class="nav-icon"><i class="bi bi-grid-1x2-fill"></i></span>
+                    Dashboard
+                </a>
+            </li>
+
+            <!-- Section: Management -->
+            <div class="sidebar-section-label">Management</div>
+
+            <!-- Teams -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/teams}">
+                    <span class="nav-icon"><i class="bi bi-shield-fill"></i></span>
+                    Teams
+                </a>
+            </li>
+
+            <!-- Players -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/players}">
+                    <span class="nav-icon"><i class="bi bi-person-fill-check"></i></span>
+                    Players
+                </a>
+            </li>
+
+            <!-- Coaches -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/coaches}">
+                    <span class="nav-icon"><i class="bi bi-person-video3"></i></span>
+                    Coaches
+                </a>
+            </li>
+
+            <!-- Matches -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/matches}">
+                    <span class="nav-icon"><i class="bi bi-calendar2-event-fill"></i></span>
+                    Matches
+                </a>
+            </li>
+
+            <!-- Transfers -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/transfers}">
+                    <span class="nav-icon"><i class="bi bi-arrow-left-right"></i></span>
+                    Transfers
+                </a>
+            </li>
+
+            <!-- Statistics -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/statistics}">
+                    <span class="nav-icon"><i class="bi bi-bar-chart-fill"></i></span>
+                    Statistics
+                </a>
+            </li>
+
+            <!-- Section: System -->
+            <div class="sidebar-section-label">System</div>
+
+            <!-- Roles -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/roles}">
+                    <span class="nav-icon"><i class="bi bi-key-fill"></i></span>
+                    Roles
+                </a>
+            </li>
+
+            <!-- Users -->
+            <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                <a class="nav-link" th:href="@{/users}">
+                    <span class="nav-icon"><i class="bi bi-people-fill"></i></span>
+                    Users
+                </a>
+            </li>
+        </ul>
+    </div><!-- /sidebar-nav -->
+
+    <!-- Logout at bottom -->
+    <div class="sidebar-footer">
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="logout-btn">
+                <span class="nav-icon"><i class="bi bi-box-arrow-left"></i></span>
+                Logout
+            </button>
+        </form>
+    </div>
+</nav><!-- /#sidebar -->
+
+<!-- ============================================================
+     TOPBAR FRAGMENT
+     Usage: <div th:replace="~{layouts/main :: topbar('Page Title')}">
+============================================================ -->
+<header id="topbar" th:fragment="topbar(pageTitle)">
+    <!-- Mobile toggle -->
+    <button id="sidebar-toggle" class="topbar-toggle me-2" type="button"
+            aria-label="Toggle sidebar">
+        <i class="bi bi-list"></i>
+    </button>
+
+    <!-- Search bar -->
+    <div class="topbar-search d-none d-md-block">
+        <span class="search-icon"><i class="bi bi-search"></i></span>
+        <input type="text" id="topbar-search-input" placeholder="Search anything…">
+    </div>
+
+    <!-- Spacer -->
+    <div class="topbar-spacer"></div>
+
+    <!-- Actions -->
+    <div class="topbar-actions">
+        <!-- Notification -->
+        <a href="#" class="topbar-icon-btn" data-bs-toggle="tooltip" title="Notifications">
+            <i class="bi bi-bell"></i>
+            <span class="badge-dot"></span>
+        </a>
+
+        <!-- Fullscreen -->
+        <button class="topbar-icon-btn" id="fullscreen-btn" type="button"
+                data-bs-toggle="tooltip" title="Toggle Fullscreen">
+            <i class="bi bi-fullscreen"></i>
+        </button>
+
+        <!-- Avatar -->
+        <div class="dropdown">
+            <a class="topbar-avatar dropdown-toggle" href="#"
+               id="avatarDropdown" role="button"
+               data-bs-toggle="dropdown" aria-expanded="false">
+                <div class="avatar-img">
+                    <i class="bi bi-person-fill" style="font-size:14px;"></i>
+                </div>
+                <div class="avatar-info">
+                    <span class="avatar-name" sec:authentication="name">Admin</span>
+                    <span class="avatar-role">Administrator</span>
+                </div>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="avatarDropdown">
+                <li>
+                    <a class="dropdown-item" href="#">
+                        <i class="bi bi-person"></i> My Profile
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item" href="#">
+                        <i class="bi bi-gear"></i> Settings
+                    </a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <li>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+    </div>
+</header><!-- /#topbar -->
+
+<!-- ============================================================
+     FOOTER FRAGMENT
+     Usage: <div th:replace="~{layouts/main :: footer}">
+============================================================ -->
+<footer id="footer" th:fragment="footer">
+    <span>&copy; 2026 <strong>Football Club Management System</strong>. All rights reserved.</span>
+</footer>
+
+<!-- ============================================================
+     DELETE CONFIRM MODAL FRAGMENT
+     Usage: <div th:replace="~{layouts/main :: deleteModal}">
+============================================================ -->
+<div th:fragment="deleteModal">
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1"
+         aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content">
+                <div class="modal-body text-center p-4">
+                    <!-- Icon -->
+                    <div class="modal-icon mb-3">
+                        <i class="bi bi-trash3"></i>
+                    </div>
+                    <h5 class="modal-title fw-700 mb-2" id="deleteConfirmModalLabel">
+                        Delete Confirmation
+                    </h5>
+                    <p class="text-muted mb-0" style="font-size:13px;">
+                        Are you sure you want to delete
+                        <strong id="deleteItemName">this record</strong>?
+                        This action cannot be undone.
+                    </p>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pt-0 pb-4">
+                    <button type="button" class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        <i class="bi bi-x-lg"></i> Cancel
+                    </button>
+                    <!-- Form action is set dynamically via JS -->
+                    <form id="deleteForm" method="get">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash3"></i> Delete
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SCRIPTS FRAGMENT
+     Usage: <div th:replace="~{layouts/main :: scripts}">
+============================================================ -->
+<div th:fragment="scripts">
+    <!-- Bootstrap 5.3 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+    <!-- Custom App JS -->
+    <script th:src="@{/js/app.js}"></script>
+
+    <!-- Fullscreen toggle -->
+    <script>
+        (function () {
+            const btn = document.getElementById('fullscreen-btn');
+            if (!btn) return;
+            btn.addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen();
+                    btn.querySelector('i').className = 'bi bi-fullscreen-exit';
+                } else {
+                    document.exitFullscreen();
+                    btn.querySelector('i').className = 'bi bi-fullscreen';
+                }
+            });
+        })();
+    </script>
+</div>
+
+<!-- ============================================================
+     TOAST CONTAINER FRAGMENT
+============================================================ -->
+<div th:fragment="toastContainer">
+    <div id="toast-container"
+         class="position-fixed bottom-0 end-0 p-3"
+         style="z-index:1100;"></div>
+</div>
+
+<!-- ============================================================
+     MOBILE OVERLAY FRAGMENT
+============================================================ -->
+<div th:fragment="overlay">
+    <div id="sidebar-overlay" class="sidebar-overlay"></div>
+</div>
+
+</html>
